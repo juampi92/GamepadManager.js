@@ -14,5 +14,7 @@ Using
 Browser compatibility
 =====
 
+
 **Chrome**: 21.0 webkit
+
 **Firefox** (Gecko): 24.0 (24.0) moz , 28.0 (28.0)
