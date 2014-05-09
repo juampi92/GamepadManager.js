@@ -41,26 +41,48 @@ function _isNumeric(n){ return !isNaN(parseFloat(n)) && isFinite(n); }
 			if ( !this.bind) return false;
 			return this._isPressed(this.gamepad.buttons[this.bind.startKey]).pressed;
 		},
-		isPressed: function(key){
+		isPressed: function(key){ // Se recomienda usar listeners
 			if ( !_isNumeric(key) ) key = this.bind.getId(key);
+			if ( key == null || key < 0 ) return; // No es una key para ese input.
 			
 			return this._isPressed(this.gamepad.buttons[key]).pressed;
 		},
 		_isPressed: function(button){ return false; },
-		on: function( event , key , callback ){
+		_getButtonValue: function(button){ return false; },
+		onButton: function( event , key , callback ){
 			if ( !_isNumeric(key) ) key = this.bind.getId(key);
 			if ( !event in ["pressed","released","holded"] ) throw "invalid Event: "+event;
 			
 			if ( this.eventKeys[key] == undefined) this.eventKeys[key] = {pressed:-1,eventos:{}};
 			this.eventKeys[key].eventos[event] = callback;
 		},
-		trigger: function(key,event,paramm){
-			var pos = this.eventKeys[key];
-			this._trigger(pos,event,paramm);
+		onAxis: function( axis , mode , sensit , callback ){
+			if ( !axis in ["movement","camera","Ltrigger","Rtrigger","arrows"] ) throw "invalid Axis: "+axis;
+			if ( !mode in ["polar","normal","discrete"] ) throw "invalid Mode: "+mode;
+			if ( typeof sensit === 'function' ) { callback = sensit; sentis = 0; }
+			
+			if ( this.eventAxis[axis] == undefined ) 
+				this.eventAxis[axis] = {
+					modes:{},
+					axis: AxisContruct(this.bind,axis,this)
+				};
+			this.eventAxis[axis].modes[mode] = {s:sensit,c:callback};
 		},
-		_trigger: function(pos,event,paramm){
+		triggerButton: function(key,event,paramm){
+			var pos = this.eventKeys[key];
+			this._triggerButton(pos,event,paramm);
+		},
+		triggerAxis: function(axis,mode,paramm){
+			var pos = this.eventAxis[axis][mode];
+			this._triggerAxis(pos,param);
+		},
+		_triggerButton: function(pos,event,paramm){
 			if ( pos != undefined && pos.eventos[event] != undefined ) 
 				pos.eventos[event](paramm);
+		},
+		_triggerAxis: function(pos,paramm){
+			if ( pos != undefined ) 
+				pos.c(paramm);
 		},
 		cancelEvent: function(key,event){
 			var pos = this.eventKeys[key];
@@ -68,32 +90,49 @@ function _isNumeric(n){ return !isNaN(parseFloat(n)) && isFinite(n); }
 				delete pos.eventos[event];
 		},
 		update: function(time){
+			this._updateButtons(time);
+			this._updateAxis(this);
+		},
+		_updateButtons: function(time){
 			// -- Buttons			
 			for ( var k in this.eventKeys ) {
 				var table = this.eventKeys[k],
 					source = this._isPressed(this.gamepad.buttons[k]).pressed;
 				if ( !source && table.pressed >= 0 ) {
-					this._trigger(table,"released",( table.pressed + time ));
+					this._triggerButton(table,"released",( table.pressed + time ));
 					table.pressed = -1;
 				} else if ( source && table.pressed < 0 ) {
-					this._trigger(table,"pressed");
+					this._triggerButton(table,"pressed");
 					table.pressed = 0;
 				} else if ( source && table.pressed >= 0 ){
 					table.pressed += time;
-					this._trigger(table,"holded",table.pressed);
+					this._triggerButton(table,"holded",table.pressed);
+				}
+			}
+		},
+		_updateAxis: function(time){
+			for ( var k in this.eventAxis ) {
+				var eje = this.eventAxis[k];
+				for (var i in eje.modes ) {
+					var modo = eje.modes[i];
+					if ( eje.axis.isActive(modo.s) )
+						this._triggerAxis(modo,eje.axis[i]());
 				}
 			}
 		}
-			// -- Axis
 	};
 
-	// 
+	// Types of Gamepad behaviour: (VER si se puede hacer con typeof (menos efectivo igual))
 	gpm.GamePadXboxController = function(){};
 
 	gpm.GamePadXboxController.prototype = new gpm.GamePad();
 	gpm.GamePadXboxController.prototype._isPressed = function(button){
 		return {pressed:button.pressed,value:button.value};
 	};
+	gpm.GamePadXboxController.prototype._getButtonValue = function(button){
+		return button.value;
+	};
+	
 
 	gpm.GamePadXboxInput = function(){};
 
@@ -101,6 +140,109 @@ function _isNumeric(n){ return !isNaN(parseFloat(n)) && isFinite(n); }
 	gpm.GamePadXboxInput.prototype._isPressed = function(button){
 		return {pressed:(button == 1.0),value:button};
 	};
+	gpm.GamePadXboxInput.prototype._getButtonValue = function(button){
+		return button;
+	};
+
+	// ----------------------------------
+	// 				Axis!
+	// ----------------------------------
+
+	function AxisContruct(bind,name,gamepad){
+		var axis = bind.axis(name),
+			type = axis.type,
+			ret = null;
+		switch ( type ){
+			case "b": ret = new AxisButton(); break;
+			case "bv": ret = new AxisButtonValue(); break;
+			case "a": ret = new AxisReal(); break;
+			case "as": ret = new AxisShared(); break;
+		}
+		ret.construct(bind,name,gamepad);
+		return ret;
+	};
+
+	// ---------- Base class
+	function Axis(){};
+	Axis.prototype._construct = function(bind,name){
+		this.bind = bind;
+		this.name = name;
+	};
+
+	// ---------- Axis Button
+	var AxisButton = function(){};
+	AxisButton.prototype = new Axis();
+
+	AxisButton.prototype.construct = function(bind,name,gp){
+		AxisReal.prototype._construct(bind,name);
+		this.btns = {
+			U: gp._isPressed(gp.gamepad.buttons[bind.U]),
+			D: gp._isPressed(gp.gamepad.buttons[bind.D]),
+			L: gp._isPressed(gp.gamepad.buttons[bind.L]),
+			R: gp._isPressed(gp.gamepad.buttons[bind.R])
+		};
+	};
+	AxisButton.prototype.isActive = function(sensitivity){
+		return ( this.btns.U || this.btns.D || this.btns.L || this.btns.R );
+	};
+	AxisButton.prototype.normal = function(){
+		var r = {v:0,h:0};
+		if ( this.btns.U ) v = -1; else if ( this.btns.D ) v = 1;
+		if ( this.btns.R ) v = 1; else if ( this.btns.L ) h = -1;
+		return r;
+	};
+	AxisButton.prototype.discrete = function(precision){ // 4 * presicion.
+		return this.btns;
+	};
+	AxisButton.prototype.polar = function(){
+		var axis = this.normal(),
+			r,ang;
+		r = Math.sqrt( Math.pow(axis.v,2) + Math.pow(axis.h,2) );
+		ang = Math.arctan( axis.v  / axis.h );
+		return [r,ang];
+	};
+	// ---------- Axis Button Value
+	var AxisButtonValue = function(){};
+	AxisButtonValue.prototype = new Axis();
+
+	AxisButtonValue.prototype.isActive = function(sensitivity){
+		return ( Math.abs(axis.v) > sensitivity || Math.abs(axis.h) > sensitivity );
+	};
+	AxisButtonValue.prototype.discretize = function(precision){ // 4 * presicion.
+
+	};
+
+	// ---------- Axis Real
+
+	var AxisReal = function(){};
+	AxisReal.prototype = new Axis();
+
+	AxisReal.prototype.construct = function(bind,name,gp){
+		AxisReal.prototype._construct(bind,name);
+		this.v = gp.gamepad.axes[bind.v];
+		this.h = gp.gamepad.axes[bind.h];
+	};
+	AxisReal.prototype.isActive = function(sensitivity){
+		return ( Math.abs(this.v) > sensitivity || Math.abs(this.h) > sensitivity );
+	};
+	AxisButton.prototype.normal = function(){
+		return [this.v,this.h];
+	};
+	AxisReal.prototype.discrete = function(){
+		var r = {U:true,D:true,L:true,R:true};
+		r.U = ( this.v > 0 );
+		r.D = !r.U;
+		r.R = ( this.h > 0 );
+		r.L = !r.L;
+		return r;
+	};
+	AxisReal.prototype.polar = function(){
+		var r,ang;
+		r = Math.sqrt( Math.pow(this.v,2) + Math.pow(this.h,2) );
+		ang = Math.arctan( this.v  / this.h );
+		return [r,ang];
+	};
+	
 
 	//-----------------------------------
 	//				Management
@@ -243,15 +385,11 @@ function _isNumeric(n){ return !isNaN(parseFloat(n)) && isFinite(n); }
 				"RA":null
 			},
 			axis: {
-				analogs: {
-					left:{type:'a',h:0,v:1},
-					right:{type:'a',h:2,v:3},
-				},
-				triggers: {
-					left:{type:'as',id:2},
-					right:{type:'as',id:2}
-				},
-				Dpad: { type:'a',h:5,v:6}
+				movement: {type:'a',h:0,v:1},
+				camera: {type:'a',h:2,v:3},
+				Ltrigger:{type:'as',id:2},
+				Rtrigger:{type:'as',id:2},
+				arrows:{ type:'a',h:5,v:6}
 			}
 		},
 		"XboxInput":{
@@ -277,18 +415,11 @@ function _isNumeric(n){ return !isNaN(parseFloat(n)) && isFinite(n); }
 				"RA":null
 			},
 			axis: {
-				analogs: {
-					left:{type:'a',h:0,v:1},
-					right:{type:'a',h:2,v:3},
-				},
-				triggers: {
-					left:{type:'b',id:6},
-					right:{type:'b',id:7}
-				},
-				Dpad: {
-					type:'b',
-					U:12,D:13,L:14,R:15
-				}
+				movement: {type:'a',h:0,v:1},
+				camera: {type:'a',h:2,v:3},
+				Ltrigger:{type:'bv',id:6},
+				Rtrigger:{type:'bv',id:7},
+				arrows:{ type:'b',U:12,D:13,L:14,R:15}
 			}
 		}
 	};
@@ -298,7 +429,6 @@ function _isNumeric(n){ return !isNaN(parseFloat(n)) && isFinite(n); }
 	window.addEventListener("gamepadconnected", function(event){ gpm.addGamepad(event.gamepad); });
 	window.addEventListener("gamepaddisconnected", function(event){	gpm.removeGamepad(event.gamepad.index); });
 	
-	// ESTO HACE ALGO RARO!!!!
 	if (! hasEvents ) setInterval( gpm.scangamepads , 500);
 
 })(gamepadManager);

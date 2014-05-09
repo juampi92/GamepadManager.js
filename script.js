@@ -21,12 +21,16 @@ function gameloop() {
 gamepadManager.on("newGamepad",function(gamepad){
 	console.log("Nuevo gamepad: " + gamepad.gamepad.id);
 	
-	gamepad.on("pressed","A",function(time){
+	gamepad.onButton("pressed","A",function(time){
 		console.log("APRETASTE");
 	});
 
-	gamepad.on("released","A",function(time){
+	gamepad.onButton("released","A",function(time){
 		console.log("Soltaste la A. La mantuviste: " + time);
+	});
+
+	gamepad.onAxis("movement","polar",0.2,function(e){
+		console.log(e);
 	});
 
 	console.log(gamepad);
