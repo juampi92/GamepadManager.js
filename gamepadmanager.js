@@ -67,6 +67,7 @@ function _isNumeric(n){ return !isNaN(parseFloat(n)) && isFinite(n); }
 					axis: AxisContruct(this.bind,axis,this)
 				};
 			this.eventAxis[axis].modes[mode] = {s:sensit,c:callback};
+			console.log(this.eventAxis[axis]);
 		},
 		triggerButton: function(key,event,paramm){
 			var pos = this.eventKeys[key];
@@ -164,7 +165,8 @@ function _isNumeric(n){ return !isNaN(parseFloat(n)) && isFinite(n); }
 
 	// ---------- Base class
 	function Axis(){};
-	Axis.prototype._construct = function(bind,name){
+	Axis.prototype._construct = function(bind,name,gp){
+		this.gp = gp;
 		this.bind = bind;
 		this.name = name;
 	};
@@ -174,12 +176,12 @@ function _isNumeric(n){ return !isNaN(parseFloat(n)) && isFinite(n); }
 	AxisButton.prototype = new Axis();
 
 	AxisButton.prototype.construct = function(bind,name,gp){
-		AxisReal.prototype._construct(bind,name);
+		this._construct(bind,name,gp);
 		this.btns = {
-			U: gp._isPressed(gp.gamepad.buttons[bind.U]),
-			D: gp._isPressed(gp.gamepad.buttons[bind.D]),
-			L: gp._isPressed(gp.gamepad.buttons[bind.L]),
-			R: gp._isPressed(gp.gamepad.buttons[bind.R])
+			U: bind.axisMap[name].U,
+			D: bind.axisMap[name].D,
+			L: bind.axisMap[name].L,
+			R: bind.axisMap[name].R
 		};
 	};
 	AxisButton.prototype.isActive = function(sensitivity){
@@ -218,28 +220,30 @@ function _isNumeric(n){ return !isNaN(parseFloat(n)) && isFinite(n); }
 	AxisReal.prototype = new Axis();
 
 	AxisReal.prototype.construct = function(bind,name,gp){
-		AxisReal.prototype._construct(bind,name);
-		this.v = gp.gamepad.axes[bind.v];
-		this.h = gp.gamepad.axes[bind.h];
+		this._construct(bind,name,gp);
+		this.v = bind.axisMap[name].v;
+		this.h = bind.axisMap[name].h;
 	};
 	AxisReal.prototype.isActive = function(sensitivity){
-		return ( Math.abs(this.v) > sensitivity || Math.abs(this.h) > sensitivity );
+		return ( Math.abs(this.gp.gamepad.axes[this.v]) > sensitivity || Math.abs(this.gp.gamepad.axes[this.h]) > sensitivity );
 	};
-	AxisButton.prototype.normal = function(){
-		return [this.v,this.h];
+	AxisReal.prototype.normal = function(){
+		return [this.gp.gamepad.axes[this.h],this.gp.gamepad.axes[this.v]];
 	};
 	AxisReal.prototype.discrete = function(){
 		var r = {U:true,D:true,L:true,R:true};
-		r.U = ( this.v > 0 );
+		r.U = ( this.gp.gamepad.axes[this.v] > 0 );
 		r.D = !r.U;
-		r.R = ( this.h > 0 );
+		r.R = ( this.gp.gamepad.axes[this.h] > 0 );
 		r.L = !r.L;
 		return r;
 	};
 	AxisReal.prototype.polar = function(){
-		var r,ang;
-		r = Math.sqrt( Math.pow(this.v,2) + Math.pow(this.h,2) );
-		ang = Math.arctan( this.v  / this.h );
+		var r,ang,
+			v = this.gp.gamepad.axes[this.v],
+			h = this.gp.gamepad.axes[this.h];
+		r = Math.sqrt( Math.pow(v,2) + Math.pow(h,2) );
+		ang = Math.atan( v  / h );
 		return [r,ang];
 	};
 	
