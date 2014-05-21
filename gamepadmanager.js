@@ -67,7 +67,6 @@ function _isNumeric(n){ return !isNaN(parseFloat(n)) && isFinite(n); }
 					axis: AxisContruct(this.bind,axis,this)
 				};
 			this.eventAxis[axis].modes[mode] = {s:sensit,c:callback};
-			console.log(this.eventAxis[axis]);
 		},
 		triggerButton: function(key,event,paramm){
 			var pos = this.eventKeys[key];
@@ -92,7 +91,7 @@ function _isNumeric(n){ return !isNaN(parseFloat(n)) && isFinite(n); }
 		},
 		update: function(time){
 			this._updateButtons(time);
-			this._updateAxis(this);
+			this._updateAxis(time);
 		},
 		_updateButtons: function(time){
 			// -- Buttons			
@@ -117,7 +116,7 @@ function _isNumeric(n){ return !isNaN(parseFloat(n)) && isFinite(n); }
 				for (var i in eje.modes ) {
 					var modo = eje.modes[i];
 					if ( eje.axis.isActive(modo.s) )
-						this._triggerAxis(modo,eje.axis[i]());
+						this._triggerAxis(modo, {pos: eje.axis[i]() , time:time});
 				}
 			}
 		}
@@ -390,7 +389,7 @@ function _isNumeric(n){ return !isNaN(parseFloat(n)) && isFinite(n); }
 			},
 			axis: {
 				movement: {type:'a',h:0,v:1},
-				camera: {type:'a',h:2,v:3},
+				camera: {type:'a',h:3,v:4},
 				Ltrigger:{type:'as',id:2},
 				Rtrigger:{type:'as',id:2},
 				arrows:{ type:'a',h:5,v:6}
