@@ -26,6 +26,7 @@ function _isNumeric(n){ return !isNaN(parseFloat(n)) && isFinite(n); }
 	gpm.GamePad.prototype = {
 		constructor: function(gp){
 			this.id = gp.index;
+			this.name = gp.id;
 			this.gamepad = gp;
 
 			this.eventKeys = {};
@@ -84,7 +85,12 @@ function _isNumeric(n){ return !isNaN(parseFloat(n)) && isFinite(n); }
 			if ( pos != undefined ) 
 				pos.c(paramm);
 		},
-		cancelEvent: function(key,event){
+		cancelButtonEvent: function(key,event){
+			var pos = this.eventKeys[key];
+			if ( pos != undefined && pos.eventos[event] != undefined ) 
+				delete pos.eventos[event];
+		},
+		cancelAxisEvent: function(axis,mode){
 			var pos = this.eventKeys[key];
 			if ( pos != undefined && pos.eventos[event] != undefined ) 
 				delete pos.eventos[event];
@@ -312,6 +318,10 @@ function _isNumeric(n){ return !isNaN(parseFloat(n)) && isFinite(n); }
 
 	gpm.getController = function(id){
 		return gpm.gamepads[id];
+	};
+
+	gpm.getControllers = function(){
+		return gpm.gamepads;
 	};
 
 	gpm.refreshGamePads = function(){

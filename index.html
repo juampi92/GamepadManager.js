@@ -5,11 +5,205 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<meta name="author" content="juampi92">
+		<link href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+		<style>
+			pre {background-color: #232323;}
+			h3{padding-left: 10px;font-weight: bold;}
+			h4{padding-left: 20px;font-weight: bold;}
+			#contribute {
+			  position: absolute;
+			  top: 0; right: 0;
+			  width: 16em; height: 10em;
+			  overflow: hidden;
+			}
+
+			#contribute p {
+			  background: #444;
+			  margin: 0; padding: 3px;  width: 16em;
+			  transform: translate(50%, -50%) rotate(45deg) translate(0, 5em);
+			  -webkit-transform: translate(50%, -50%) rotate(45deg) translate(0, 5em);
+			}
+
+			#contribute a {
+			  display: block;
+			  padding: 0.2em 0;
+			  text-align: center;
+			  border: dashed white 1px;
+			  font-weight: bold;
+			  text-decoration: none;
+			}
+		</style>
+		<link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/railscasts.min.css">
 
 		<title>Gamepad Manager</title>
 	</head>
 	<body>
-		<h3>Library's site. (under construction)</h3>
-		<h3><a href="./demo.html">Demo</a></h3>
+		<div id="contribute">
+		    <p><a href="https://github.com/juampi92/GamepadManager.js" target="_blank">GitHub</a></p>
+		</div>
+		<div class="container" style="width:870px;margin-top:40px">
+
+	        <div>
+	            <h1>GamepadManager.js</h1>
+	            <p>Manage all your Gamepad inputs, not minding the model or its analogs or buttons</p>
+	        </div>
+			
+			<hr>
+
+			<div>
+	        	<h2>Usage</h2>
+	        	<ul>
+	        		<li><a href="#gpm">GamepadManager</a><ul>
+        				<li><a href="#gpmevents">Events</a></li>
+        				<li><a href="#gpmupdate">Update</a></li>
+	        		</ul></li>
+	        		<li><a href="#gamepad">Gamepad</a><ul>
+        				<li><a href="#btnEvents">Button events</a></li>
+        				<li><a href="#axisEvents">Axis events</a></li>
+	        		</ul></li>
+	        	</ul>
+	        	<h3 id="gpm" name="gpm">GamepadManager:</h3>
+	        	<p>Get controller:</p>
+<pre><code>var gamepad = gamepadManager.getController(id);</code></pre>
+				<p>Get controller:</p>
+<pre><code>var gamepads = gamepadManager.getControllers(); // Array of Gamepads</code></pre>
+
+	        	<h4 id="gpmevents" name="gpmevents">Detect Events:</h4>
+	        	<p>Detect new Gamepads:</p>
+<pre><code>gamepadManager.on("newGamepad",function(gamepad){
+	// Do something when a Gamepad is detected
+};</code></pre>
+	        	<p>Detect when a Gamepad is disconnected:</p>
+<pre><code>gamepadManager.on("outGamepad",function(gamepadid){
+	// gamepadid was disconnected
+});</code></pre>
+				<p>Subscribe to the Start button:</p>
+<pre><code>gamepadManager.onNextStart(function(gamepad){
+	// When 'start' is pressed, this is triggered (no matter the Gamepad).
+	//		If this returns TRUE, it removes itself. Else, it keeps listening the Start button.
+	// Gamepad: gamepad.id
+	return true;
+});</code></pre>
+				
+				<h4 id="gpmupdate" name="gpmupdate">Update:</h4>
+				<p>To make this work on your game, you have to include the gamepads on the <b>gameloop</b>.</p>
+				<p>Fist you'll have to search for new gamepads. So at the beggining of the loop add:</p>
+<pre><code>gamepadManager.refreshGamePads();</code></pre>
+				<p>Then, at the end, or later, add the logic update:</p>
+				<pre><code>gamepadManager.update( time );</code></pre>
+				<p>The time is the timestamp difference between the loops. This method will trigger all the events related to each gamepad that is subscribed</p>
+
+				<h3 id="gamepad" name="gamepad">Gamepad:</h3>
+				<h4>Atributes:</h4>
+<pre><code>gamepad.id; // ID of the gamepad (setted on arrival)
+gamepad.name; // Name given by the browser
+gamepad.gamepad; // Browser gamepad</code></pre>
+				<h4>Methods:</h4>
+<pre><code>isStartPressed(); // bool if the Start button is pressed
+isPressed(key); // bool if key is pressed. Key could be a number, o a string (used in the bind)</code></pre>
+				<br>
+				<h4>Events:</h4>
+				<p><b id="btnEvents" name="btnEvents">Button events</b></p>
+<pre><code>gamepad.onButton( event , key , callback );</code></pre>
+				<p>Types of events:</p>
+<pre><code>"pressed" // The moment the button state changes from not pressed to pressed.
+"released" // The moment the button states changes from pressed to not pressed.
+"holded" // When the button is pressed and was pressed the previous check (send repeatedly until release)</code></pre>
+				<p>Callbacks</p>
+<pre><code>// Released and Holded, send also the time that the button was/is being pressed
+gamepad.onButton("released","A",function(t){
+	// time that passed since pressed: t
+});</code></pre>
+				<p>Cancel button event</p>
+<pre><code>gamepad.cancelButtonEvent( key , event );</code></pre>
+				<br>
+				<p id="axisEvents" name="axisEvents"><b>Axis events</b></p>
+<pre><code>gamepad.onAxis( axis , mode , sensitivity , callback );</code></pre>
+				<p>The sensitivity parameter is the minimum value of the axis to trigger the event. Used as the minimum radius, being 0.1 the most sensitive.</p>
+				<p>Types of Axis</p>
+<pre><code>"movement" // Commonly the left axis
+"camera" // Right axis
+"Ltrigger" // Left trigger
+"Rtrigger" // Right trigger
+"arrows" // Dpad</code></pre>
+				<p>Types of modes</p>
+<pre><code>"polar" // Returns [ radius , angle ]
+"normal" // Returns [ Horizontal , Vertical ] (values from -1 to 1)
+"discrete" // Returns { U: bool , D: bool , L: bool , R: bool } As in: Up Down Left Right</code></pre>
+				<p>Callbacks</p>
+<pre><code>gamepad.onAxis("camera","normal",0.2,function(e){
+	// e.time: time between gameloops
+	// e.pos: depends on the mode (array of two elements, or object of four properties)
+});</code></pre>
+				<p>Cancel axis event</p>
+<pre><code>gamepad.cancelAxisEvent(axis,mode);</code></pre>
+
+	        </div>
+
+	        <hr>
+			
+			<div>
+	        	<h2>Example</h2>
+<pre><code>
+gamepadManager.on("newGamepad",function(gamepad){
+	console.log("New gamepad: " + gamepad.name);
+	console.log("Press Start Button to join!");
+});
+
+gamepadManager.on("outGamepad",function(gamepadid){
+	console.log("Gamepad disconnected: " + gamepadid);
+});
+
+gamepadManager.onNextStart(function(gamepad){
+
+	var player = new Player(gamepad);
+	players.push(player);
+	
+	gamepad.onButton("pressed","A",function(time){
+		player.actionJump(); // You'll have to press the jump button again to jump again. No holding
+	});
+
+	gamepad.onButton("holded","X",function(time){
+		player.actionFire(time); // Use the time to make it independent of the FPS, or the refresh time.
+		// Example: if this refreshes 60 times a second, the player will fire 60 shots per second. 
+		//   But if less, he will fire less shots per second, and that's why the time is important.
+	});
+
+	gamepad.onAxis("camera","polar",0.2,function(e){
+		player.setAim(e.pos[1]); // Here we are using only the angle from the camera axis.
+	});
+
+	gamepad.onAxis("movement","normal",0.1,function(e){
+		player.move(e.time,e.pos[0],e.pos[1]);
+	});
+
+	return true;
+	// This onNextStart event will be deleted. To support more players, you should set this to false,
+	//	and validate that the players is not already added.
+});	
+</code></pre>
+	        </div>
+
+	        <hr>
+
+	        <div>
+	        	<h2>Demo</h2>
+	        	<p>Try this <a href="utils/demo.html">live demo</a></p>
+	        </div>
+
+	        <hr>
+
+	        <footer>
+	            <div class="row">
+	                <div class="col-lg-12">
+	                    <p>Copyright &copy; 2015</p>
+	                </div>
+	            </div>
+	        </footer>
+
+	    </div>
+	    
+	    <script src="utils/highlight.min.js"></script>
+	    <script>hljs.initHighlightingOnLoad();</script>
 	</body>
 </html>
