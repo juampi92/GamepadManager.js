@@ -51,18 +51,26 @@
 			<hr>
 
 			<div>
-	        	<h2>Usage</h2>
-	        	<ul>
-	        		<li><a href="#gpm">GamepadManager</a><ul>
-        				<li><a href="#gpmevents">Events</a></li>
-        				<li><a href="#gpmupdate">Update</a></li>
-	        		</ul></li>
-	        		<li><a href="#gamepad">Gamepad</a><ul>
-        				<li><a href="#btnEvents">Button events</a></li>
-        				<li><a href="#axisEvents">Axis events</a></li>
-	        		</ul></li>
-	        	</ul>
-	        	<h3 id="gpm" name="gpm">GamepadManager:</h3>
+				<ul style="font-weight:bold;font-size:1.2em;">
+					<li><a href="#gpm">Usage</a><ul>
+		        		<li><a href="#gpm">GamepadManager</a><ul>
+	        				<li><a href="#gpmevents">Events</a></li>
+	        				<li><a href="#gpmupdate">Update</a></li>
+		        		</ul></li>
+		        		<li><a href="#gamepad">Gamepad</a><ul>
+	        				<li><a href="#btnEvents">Button events</a></li>
+	        				<li><a href="#axisEvents">Axis events</a></li>
+		        		</ul></li>
+		        	</ul></li>
+		        	<li><a href="#example">Example</a></li>
+		        	<li><a href="#demo">Demo</a></li>
+			</div>
+
+			<hr>
+
+			<div>
+	        	<h2 id="gpm" name="gpm">Usage</h2>
+	        	<h3>GamepadManager:</h3>
 	        	<p>Get controller:</p>
 <pre><code>var gamepad = gamepadManager.getController(id);</code></pre>
 				<p>Get controller:</p>
@@ -143,7 +151,7 @@ gamepad.onButton("released","A",function(t){
 	        <hr>
 			
 			<div>
-	        	<h2>Example</h2>
+	        	<h2 id="example" name="example">Example</h2>
 <pre><code>
 gamepadManager.on("newGamepad",function(gamepad){
 	console.log("New gamepad: " + gamepad.name);
@@ -215,7 +223,7 @@ rAF(gameloop);</code></pre>
 	        <hr>
 
 	        <div>
-	        	<h2>Demo</h2>
+	        	<h2 id="demo" name="demo">Demo</h2>
 	        	<p>Try this <a href="utils/demo.html">live demo</a></p>
 	        </div>
 
