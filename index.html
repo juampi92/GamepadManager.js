@@ -182,6 +182,34 @@ gamepadManager.onNextStart(function(gamepad){
 	//	and validate that the players is not already added.
 });	
 </code></pre>
+				<p>Example of Gameloop:</p>
+<pre><code>var rAF = window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.requestAnimationFrame;
+
+function gameloop() {
+	// Detect new gamepads (important in Chrome)
+	gamepadManager.refreshGamePads();
+
+	// Recursion
+	rAF(gameloop);
+
+	// Time Logic
+	lastLoop = newLoop;
+	newLoop = new Date().getTime();
+	time = newLoop - lastLoop;
+	
+	// Game Logic:
+	gamepadManager.update(time);
+	Game.updateLogic(time);
+
+	// Game Graphics
+	Game.render();
+};
+
+var lastLoop = new Date().getTime(),
+	newLoop = lastLoop,
+	time = 0;
+
+rAF(gameloop);</code></pre>
 	        </div>
 
 	        <hr>
