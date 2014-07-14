@@ -450,5 +450,5 @@ function _isNumeric(n){ return !isNaN(parseFloat(n)) && isFinite(n); }
 })(gamepadManager);
 
 if(typeof(exports) !== 'undefined') {
-    exports.gamepadManager = gamepadManager;
+    exports = gamepadManager;
 }
