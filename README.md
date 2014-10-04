@@ -3,10 +3,9 @@ GamepadManager.js
 
 Gamepad Manager Library for Javascript (HTML5)
 
-[**How to use**](http://juampi92.github.io/GamepadManager.js/)
+  *  [**How to use**](http://juampi92.github.io/GamepadManager.js/)
+  *  [**Demo**](http://juampi92.github.io/GamepadManager.js/utils/demo.html)
 
-[**Demo**](http://juampi92.github.io/GamepadManager.js/utils/demo.html)
----
 
 Using
 =====
