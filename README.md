@@ -1,7 +1,9 @@
 GamepadManager.js
 =================
 
-Gamepad Manager Library for Javascript (html5)
+Gamepad Manager Library for Javascript (HTML5)
+
+[**How to use**](http://juampi92.github.io/GamepadManager.js/)
 
 [**Demo**](http://juampi92.github.io/GamepadManager.js/utils/demo.html)
 ---
@@ -13,7 +15,6 @@ Using
 
 Browser compatibility
 =====
-
 
 **Chrome**: 21.0 webkit
 
