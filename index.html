@@ -195,7 +195,8 @@ gamepadManager.onNextStart(function(gamepad){
 
 function gameloop() {
 	// Detect new gamepads (important in Chrome)
-	gamepadManager.refreshGamePads();
+	// Maybe do this once in a while
+	gamepadManager.scangamepads();
 
 	// Recursion
 	rAF(gameloop);
