@@ -6,6 +6,8 @@ Gamepad Manager Library for Javascript (HTML5)
   *  [**How to use**](http://juampi92.github.io/GamepadManager.js/)
   *  [**Demo**](http://juampi92.github.io/GamepadManager.js/utils/demo.html)
 
+  *  [**Xbox 360 Demo**](http://juampi92.github.io/GamepadManager.js/utils/xbox_demo.html)
+
 
 Using
 =====
