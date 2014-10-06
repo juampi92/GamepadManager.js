@@ -18,8 +18,9 @@ if (!String.prototype.contains) {
   };
 }
 
+
 (function(gpm) {
-  "use strict";
+  'use strict';
 
   var hasEvents = 'GamepadEvent' in window;
 
@@ -67,7 +68,7 @@ if (!String.prototype.contains) {
     },
     onButton: function(event, key, callback) {
       if (!_isNumeric(key)) key = this.bind.getId(key);
-      if (!event in ["pressed", "released", "holded"]) throw "invalid Event: " + event;
+      if (!event in ['pressed', 'released', 'holded']) throw 'invalid Event: ' + event;
 
       if (this.eventKeys[key] === undefined) this.eventKeys[key] = {
         pressed: -1,
@@ -76,11 +77,11 @@ if (!String.prototype.contains) {
       this.eventKeys[key].eventos[event] = callback;
     },
     onAxis: function(axis, mode, sensit, callback) {
-      if (!axis in ["movement", "camera", "Ltrigger", "Rtrigger", "arrows"]) throw "invalid Axis: " + axis;
-      if (!mode in ["polar", "normal", "discrete"]) throw "invalid Mode: " + mode;
+      if (!axis in ['movement', 'camera', 'Ltrigger', 'Rtrigger', 'arrows']) throw 'invalid Axis: ' + axis;
+      if (!mode in ['polar', 'normal', 'discrete']) throw 'invalid Mode: ' + mode;
       if (typeof sensit === 'function') {
         callback = sensit;
-        sentis = 0;
+        sensit = 0;
       }
 
       if (this.eventAxis[axis] === undefined)
@@ -129,14 +130,14 @@ if (!String.prototype.contains) {
         var table = this.eventKeys[k],
           source = this._isPressed(this.gamepad.buttons[k]).pressed;
         if (!source && table.pressed >= 0) {
-          this._triggerButton(table, "released", (table.pressed + time));
+          this._triggerButton(table, 'released', (table.pressed + time));
           table.pressed = -1;
         } else if (source && table.pressed < 0) {
-          this._triggerButton(table, "pressed");
+          this._triggerButton(table, 'pressed');
           table.pressed = 0;
         } else if (source && table.pressed >= 0) {
           table.pressed += time;
-          this._triggerButton(table, "holded", table.pressed);
+          this._triggerButton(table, 'holded', table.pressed);
         }
       }
     },
@@ -192,16 +193,16 @@ if (!String.prototype.contains) {
       type = axis.type,
       ret = null;
     switch (type) {
-      case "b":
+      case 'b':
         ret = new AxisButton();
         break;
-      case "bv":
+      case 'bv':
         ret = new AxisButtonValue();
         break;
-      case "a":
+      case 'a':
         ret = new AxisReal();
         break;
-      case "as":
+      case 'as':
         ret = new AxisShared();
         break;
     }
@@ -337,6 +338,9 @@ if (!String.prototype.contains) {
         _GamePad = new gpm.GamePadXboxInput();
         _GamePad.bind(new gpm.Bind(_premade_binds.XboxInput));
         break;
+      default:
+        gpm.trigger('undefinedGamepad', gamepad_id);
+        break;
     }
     return _GamePad;
   };
@@ -348,13 +352,13 @@ if (!String.prototype.contains) {
     gpm.gamepads_size++;
     // Start bind
 
-    gpm.trigger("newGamepad", gp);
+    gpm.trigger('newGamepad', gp);
   };
 
   gpm.removeGamepad = function(id) {
     delete gpm.gamepads[id];
     gpm.gamepads_size--;
-    gpm.trigger("outGamepad", id);
+    gpm.trigger('outGamepad', id);
   };
 
   gpm.update = function(time) {
@@ -426,27 +430,27 @@ if (!String.prototype.contains) {
   //          x < 0     -> it's not available
   //          x == null -> it's an axis
   var _premade_binds = {
-    "XboxInput": {
+    'XboxInput': {
       startKey: 9,
       buttons: {
-        "A": 0,
-        "B": 1,
-        "X": 2,
-        "Y": 3,
-        "LB": 4,
-        "RB": 5,
-        "LT": 6,
-        "RT": 7,
-        "Back": 8,
-        "Start": 9,
-        "LS": 10,
-        "RS": 11,
-        "Up": 12,
-        "Down": 13,
-        "Left": 14,
-        "Right": 15,
-        "LA": null,
-        "RA": null
+        'A': 0,
+        'B': 1,
+        'X': 2,
+        'Y': 3,
+        'LB': 4,
+        'RB': 5,
+        'LT': 6,
+        'RT': 7,
+        'Back': 8,
+        'Start': 9,
+        'LS': 10,
+        'RS': 11,
+        'Up': 12,
+        'Down': 13,
+        'Left': 14,
+        'Right': 15,
+        'LA': null,
+        'RA': null
       },
       axis: {
         movement: {
@@ -480,10 +484,10 @@ if (!String.prototype.contains) {
 
   //---------- Gamepads events
 
-  window.addEventListener("gamepadconnected", function(event) {
+  window.addEventListener('gamepadconnected', function(event) {
     gpm.addGamepad(event.gamepad);
   });
-  window.addEventListener("gamepaddisconnected", function(event) {
+  window.addEventListener('gamepaddisconnected', function(event) {
     gpm.removeGamepad(event.gamepad.index);
   });
 

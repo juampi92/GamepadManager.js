@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="juampi92">
+
+    <title>Gamepad Manager Demo</title>
+    <style type="text/css">
+      #container {
+        margin: 10% auto;
+        width: 400px;
+        position:relative;
+        padding: 0;
+      }
+      #error {
+        position: absolute;
+        width: inherit;
+        text-align: center;
+        top: 10%;
+        margin: auto 0;
+
+        font-family: 'Lucida Console';
+        font-size: 20px;
+        font-weight: bold;
+        z-index: 50;
+        text-shadow: white 1px 2px 1px;
+        color: black;
+      }
+      #controller.disabled {
+        opacity: .5;
+      }
+      #controller{
+        background-image: url('xbox_controller.png');
+        width:400px;
+        height: 300px;
+      }
+      .button {
+        background-image: url('buttons.png');
+        position:absolute;
+        display: none;
+      }
+
+      #A {
+        width:12px;
+        height:12px;
+        background-position: 0 0;
+        top: 102px;
+        left: 280px;
+      }
+      #B {
+        width:12px;
+        height:12px;
+        background-position: 0 -12px;
+        top: 86px;
+        left: 300px;
+      }
+      #X {
+        width:12px;
+        height:12px;
+        background-position: 0 -24px;
+        top: 86px;
+        left: 260px;
+      }
+      #Y {
+        width:12px;
+        height:12px;
+        background-position: 0 -36px;
+        top: 70px;
+        left: 280px;
+      }
+
+      .axis {
+        display: block;
+        width:32px;
+        height:32px;
+        background-position: -12px 0;
+      }
+
+      #movement {
+        top: 74px;
+        left: 98px;
+      }
+      #camera {
+        top: 134px;
+        left: 244px;
+      }
+
+      .bumper {
+        width: 28px;
+        height: 4px;
+        background-position: -12px -48px;
+      }
+      #LB {
+        top: 50px;
+        left: 100px;
+      }
+      #RB {
+        top: 50px;
+        left: 272px;
+      }
+
+      .dpad {
+        width: 16px;
+        height: 16px;
+        background-position: -12px -32px;
+      }
+      #Up {
+        top: 126px;
+        left: 132px;
+      }
+      #Down {
+        top: 158px;
+        left: 132px;
+      }
+      #Left {
+        top: 142px;
+        left: 116px;
+      }
+      #Right {
+        top: 142px;
+        left: 148px;
+      }
+
+      .menu {
+        width: 12px;
+        height: 8px;
+        background-position: 0 -48px;
+      }
+      #Back {
+        top: 102px;
+        left: 160px;
+      }
+      #Start {
+        top: 102px;
+        left: 228px;
+      }
+      
+
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div id="error">Waiting for a Controller</div>
+      <div id="controller" class="disabled">
+        <div id="A" class="button"></div>
+        <div id="B" class="button"></div>
+        <div id="X" class="button"></div>
+        <div id="Y" class="button"></div>
+        <div id="movement" class="button axis"></div>
+        <div id="camera" class="button axis"></div>
+        <div id="LB" class="button bumper"></div>
+        <div id="RB" class="button bumper"></div>
+        <div id="Up" class="button dpad"></div>
+        <div id="Down" class="button dpad"></div>
+        <div id="Left" class="button dpad"></div>
+        <div id="Right" class="button dpad"></div>
+        <div id="Back" class="button menu"></div>
+        <div id="Start" class="button menu"></div>
+      </div>
+    </div>
+
+    <script src="../gamepadmanager.js"></script>
+    <script type="text/javascript">
+      var rAF = window.requestAnimationFrame,
+        gamepad = false,
+        controller = document.getElementById('controller'),
+        empty = document.getElementById('empty'),
+        controllerElements = {
+          A: document.getElementById('A'),
+          B: document.getElementById('B'),
+          X: document.getElementById('X'),
+          Y: document.getElementById('Y'),
+          movement: document.getElementById('movement'),
+          camera: document.getElementById('camera'),
+          LB: document.getElementById('LB'),
+          RB: document.getElementById('RB'),
+          Up: document.getElementById('Up'),
+          Down: document.getElementById('Down'),
+          Left: document.getElementById('Left'),
+          Right: document.getElementById('Right'),
+          Back: document.getElementById('Back'),
+          Start: document.getElementById('Start')
+        },
+        axisCoords = {
+          movement: {
+            top: 74,
+            left: 98
+          },
+          camera: {
+            top: 134,
+            left: 244
+          }
+        };
+
+      function gameloop() {
+        gamepadManager.scangamepads();
+
+        // Recursion
+        rAF(gameloop);
+
+        // Time Logic
+        lastLoop = nuevoLoop;
+        nuevoLoop = new Date().getTime();
+        time = nuevoLoop - lastLoop;
+
+        // Game Loop:
+        gamepadManager.update(time);
+      }
+
+      // Start Code:
+      gamepadManager.on('newGamepad', function(newGamepad) {
+        if (gamepad) return;
+        gamepad = newGamepad;
+
+        console.log('New Gamepad: ' + gamepad.gamepad.id);
+        controller.className = '';
+        error.style.display = 'none';
+
+        /**
+         * Subscribe to ALL Buttons
+         */
+        gamepad.onButton('pressed', 'A', function(time) {
+          controllerElements.A.style.display = 'block';
+        });
+        gamepad.onButton('released', 'A', function(time) {
+          controllerElements.A.style.display = 'none';
+        });
+
+        gamepad.onButton('pressed', 'B', function(time) {
+          controllerElements.B.style.display = 'block';
+        });
+        gamepad.onButton('released', 'B', function(time) {
+          controllerElements.B.style.display = 'none';
+        });
+
+        gamepad.onButton('pressed', 'X', function(time) {
+          controllerElements.X.style.display = 'block';
+        });
+        gamepad.onButton('released', 'X', function(time) {
+          controllerElements.X.style.display = 'none';
+        });
+
+        gamepad.onButton('pressed', 'Y', function(time) {
+          controllerElements.Y.style.display = 'block';
+        });
+        gamepad.onButton('released', 'Y', function(time) {
+          controllerElements.Y.style.display = 'none';
+        });
+
+        gamepad.onButton('pressed', 'Start', function(time) {
+          controllerElements.Start.style.display = 'block';
+        });
+        gamepad.onButton('released', 'Start', function(time) {
+          controllerElements.Start.style.display = 'none';
+        });
+
+        gamepad.onButton('pressed', 'Back', function(time) {
+          controllerElements.Back.style.display = 'block';
+        });
+        gamepad.onButton('released', 'Back', function(time) {
+          controllerElements.Back.style.display = 'none';
+        });
+
+        gamepad.onButton('pressed', 'LB', function(time) {
+          controllerElements.LB.style.display = 'block';
+        });
+        gamepad.onButton('released', 'LB', function(time) {
+          controllerElements.LB.style.display = 'none';
+        });
+
+        gamepad.onButton('pressed', 'RB', function(time) {
+          controllerElements.RB.style.display = 'block';
+        });
+        gamepad.onButton('released', 'RB', function(time) {
+          controllerElements.RB.style.display = 'none';
+        });
+
+        gamepad.onButton('pressed', 'Up', function(time) {
+          controllerElements.Up.style.display = 'block';
+        });
+        gamepad.onButton('released', 'Up', function(time) {
+          controllerElements.Up.style.display = 'none';
+        });
+        gamepad.onButton('pressed', 'Down', function(time) {
+          controllerElements.Down.style.display = 'block';
+        });
+        gamepad.onButton('released', 'Down', function(time) {
+          controllerElements.Down.style.display = 'none';
+        });
+        gamepad.onButton('pressed', 'Left', function(time) {
+          controllerElements.Left.style.display = 'block';
+        });
+        gamepad.onButton('released', 'Left', function(time) {
+          controllerElements.Left.style.display = 'none';
+        });
+        gamepad.onButton('pressed', 'Right', function(time) {
+          controllerElements.Right.style.display = 'block';
+        });
+        gamepad.onButton('released', 'Right', function(time) {
+          controllerElements.Right.style.display = 'none';
+        });
+
+        gamepad.onAxis('movement', 'normal', 0.1, function(e) {
+          controllerElements.movement.style.left = ( axisCoords.movement.left + e.pos[0] * 10 ) + 'px';
+          controllerElements.movement.style.top = ( axisCoords.movement.top + e.pos[1] * 10 ) + 'px';
+        });
+
+        gamepad.onAxis('camera', 'normal', 0.1, function(e) {
+          controllerElements.camera.style.left = ( axisCoords.camera.left + e.pos[0] * 10 ) + 'px';
+          controllerElements.camera.style.top = ( axisCoords.camera.top + e.pos[1] * 10 ) + 'px';
+        });
+      });
+
+      gamepadManager.on('undefinedGamepad', function(name) {
+        alert('The gamepad ' + name + ' is not supported by this library');
+      });
+
+      gamepadManager.on('outGamepad', function(gamepadid) {
+        controller.className = 'disabled';
+        error.style.display = 'block';
+      });
+
+      var lastLoop = new Date().getTime(),
+        nuevoLoop = lastLoop,
+        time = 0;
+
+      rAF(gameloop);
+    </script>
+  </body>
+</html>

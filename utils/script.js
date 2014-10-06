@@ -2,7 +2,7 @@ var rAF = window.mozRequestAnimationFrame || window.requestAnimationFrame;
 
 // Programador en el aire:
 var Canvas = {
-	el: document.getElementById("canvas"),
+	el: document.getElementById('canvas'),
 	context: null,
 	draws: null,
 	draws_ctx: null,
@@ -127,8 +127,8 @@ function gameloop() {
 }
 
 // Start Code:
-gamepadManager.on("newGamepad", function(gamepad) {
-	console.log("Nuevo gamepad: " + gamepad.gamepad.id);
+gamepadManager.on('newGamepad', function(gamepad) {
+	console.log('Nuevo gamepad: ' + gamepad.gamepad.id);
 
 	var plyr = new Player();
 	plyr.nuevo(players.length, {
@@ -137,22 +137,22 @@ gamepadManager.on("newGamepad", function(gamepad) {
 	}, gamepad, colores[players.length]);
 	players.push(plyr);
 
-	gamepad.onButton("pressed", "A", function(time) {
+	gamepad.onButton('pressed', 'A', function(time) {
 		plyr.pressed = true;
 		Canvas.change(plyr);
 	});
 
-	gamepad.onButton("released", "A", function(time) {
+	gamepad.onButton('released', 'A', function(time) {
 		plyr.pressed = false;
 		Canvas.change(plyr);
 	});
 
-	gamepad.onAxis("camera", "normal", 0.2, function(e) {
+	gamepad.onAxis('camera', 'normal', 0.2, function(e) {
 		plyr.setTarget(e.pos[0], e.pos[1]);
 		Canvas.change(plyr);
 	});
 
-	gamepad.onAxis("movement", "normal", 0.1, function(e) {
+	gamepad.onAxis('movement', 'normal', 0.1, function(e) {
 		plyr.moveCoords(e.time, e.pos[0], e.pos[1]);
 		Canvas.change(plyr);
 	});
@@ -160,12 +160,16 @@ gamepadManager.on("newGamepad", function(gamepad) {
 	//console.log(gamepad);
 });
 
-gamepadManager.on("outGamepad", function(gamepadid) {
-	console.log("Se desconectó el Gamepad: " + gamepadid);
+gamepadManager.on('undefinedGamepad', function(name) {
+	alert('The gamepad ' + name + ' is not supported by this library');
+});
+
+gamepadManager.on('outGamepad', function(gamepadid) {
+	console.log('Se desconectó el Gamepad: ' + gamepadid);
 });
 
 gamepadManager.onNextStart(function(gamepad) {
-	console.log("When 'start' is pressed, this is triggered. If returns TRUE, it removes itself. Gamepad:" + gamepad.id);
+	console.log('When \' start \' is pressed, this is triggered. If returns TRUE, it removes itself. Gamepad:' + gamepad.id);
 	return true;
 });
 

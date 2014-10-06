@@ -92,6 +92,11 @@
 	// Gamepad: gamepad.id
 	return true;
 });</code></pre>
+				<p>Not supported gamepad:</p>
+<pre><code>gamepadManager.on("undefinedGamepad", function(gamepadName){
+	// When the gamepad is not supported by this library, you can know subscribing to this event.
+	alert('The gamepad ' + name + ' is not supported by this library');
+});</code></pre>
 				
 				<h4 id="gpmupdate" name="gpmupdate">Update:</h4>
 				<p>To make this work on your game, you have to include the gamepads on the <b>gameloop</b>.</p>
